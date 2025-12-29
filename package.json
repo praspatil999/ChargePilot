@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "passport-local-mongoose": "^9.0.1"
+  }
+}
