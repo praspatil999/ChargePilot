@@ -8,10 +8,17 @@ const bookingSchema = new mongoose.Schema(
       required: true,
     },
 
-    station: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Station",
+    stationOCMId: {
+      type: Number,
       required: true,
+    },
+
+    stationSnapshot: {
+      name: String,
+      address: String,
+      chargerType: String,
+      power: Number,
+      pricePerUnit: Number,
     },
 
     vehicle: {
@@ -123,12 +130,12 @@ const bookingSchema = new mongoose.Schema(
 );
 
 // Generate booking number
-bookingSchema.pre("save", function (next) {
+bookingSchema.pre("save", function () {
   if (!this.checkinCode) {
     this.checkinCode = Math.floor(100000 + Math.random() * 900000).toString();
   }
-  next();
 });
+
 
 // Calculate estimated cost
 bookingSchema.methods.calculateEstimatedCost = function () {

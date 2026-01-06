@@ -1,26 +1,53 @@
 import express from "express";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Vehicle from "../models/Vehicle.js";
-import passport from "passport";
-const router = express.Router({ mergeParams: true });
-import passportLocalMongoose from "passport-local-mongoose";
 
+
+const router = express.Router({ mergeParams: true });
+
+/* ---------------- JWT UTILS ---------------- */
+
+const signToken = (userId) => {
+  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "7d" });
+};
+
+const sendToken = (res, token) => {
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+};
+
+/* ---------------- SIGNUP ---------------- */
 
 router.post("/signup", async (req, res) => {
   try {
     const { fullName, email, password, vehicle } = req.body;
 
-    // 1. Create the User object (without password, .register handles that)
-    const newUser = new User({ fullName, email });
+    // 1. Check existing user
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists" });
+    }
 
-    // 2. Use passport-local-mongoose's .register() method
-    // This saves the user and hashes the password automatically
-    const registeredUser = await User.register(newUser, password);
+    // 2. Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // 3. Handle Vehicle logic if provided
+    // 3. Create user
+    const newUser = await User.create({
+      fullName,
+      email,
+      password: hashedPassword,
+    });
+
+    // 4. Vehicle logic (unchanged, but clean)
     if (vehicle) {
-      const newVehicle = new Vehicle({
-        userId: registeredUser._id, // Link vehicle to user
+      const newVehicle = await Vehicle.create({
+        userId: newUser._id,
         model: vehicle.model,
         batteryCapacity: vehicle.batteryCapacity,
         efficiency: vehicle.efficiency,
@@ -28,70 +55,79 @@ router.post("/signup", async (req, res) => {
         maxChargingPower: vehicle.maxChargingPower,
       });
 
-      const savedVehicle = await newVehicle.save();
-
-      // 4. Update the User with the vehicle reference
-      registeredUser.vehicles.push(savedVehicle._id);
-      registeredUser.defaultVehicle = savedVehicle._id;
-      await registeredUser.save();
+      newUser.vehicles.push(newVehicle._id);
+      newUser.defaultVehicle = newVehicle._id;
+      await newUser.save();
     }
 
-    // 5. Automatically log the user in after signup
-    req.login(registeredUser, (err) => {
-      if (err)
-        return res.status(500).json({ message: "Login failed after signup" });
+    // 5. Issue JWT (THIS replaces req.login)
+    const token = signToken(newUser._id);
+    sendToken(res, token);
 
-      return res.status(201).json({
-        message: "Signup successful!",
-        user: {
-          id: registeredUser._id,
-          fullName: registeredUser.fullName,
-          email: registeredUser.email,
-        },
-      });
+    return res.status(201).json({
+      message: "Signup successful",
+      user: {
+        id: newUser._id,
+        fullName: newUser.fullName,
+        email: newUser.email,
+      },
     });
-  } catch (error) {
-    // passport-local-mongoose throws specific errors (e.g., UserExistsError)
-    res.status(400).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
-router.post("/login", (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) {
-      return res.status(500).json({ message: "Internal server error" });
+/* ---------------- LOGIN ---------------- */
+
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body; 
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
     }
+
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
-      // info contains the error message from passport-local-mongoose
-      return res
-        .status(401)
-        .json({ message: info.message || "Invalid email or password" });
+      return res.status(401).json({ message: "Invalid email or password" });
     }
 
-    req.logIn(user, (err) => {
-      if (err) return res.status(500).json({ message: "Login failed" });
+    const isMatch = await bcrypt.compare(password, user.password);
+    console.log("USER:", user);
+    console.log("HASH:", user.password);
 
-      return res.status(200).json({
-        message: "Logged in successfully!",
-        user: {
-          id: user._id,
-          fullName: user.fullName,
-          email: user.email,
-        },
-      });
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    const token = signToken(user._id);
+    sendToken(res, token); // MUST NOT send response
+
+    res.status(200).json({
+      message: "Logged in successfully",
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+      },
     });
-  })(req, res, next);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
 });
 
+/* ---------------- LOGOUT ---------------- */
 
-router.get("/logout", (req, res, next) => {
-  req.logout((err) => {
-    if (err) {
-      return next(err);
-    }
-    // This clears the session cookie on the client side
-    res.status(200).json({ message: "Logged out successfully!" });
+router.get("/logout", (req, res) => {
+  // JWT logout = delete cookie
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
   });
+
+  return res.status(200).json({ message: "Logged out successfully" });
 });
 
 export default router;

@@ -18,8 +18,7 @@ const MapboxAutocomplete = ({
   const dropdownRef = useRef(null);
 
   // IMPORTANT: Add your Mapbox token here
-  const MAPBOX_TOKEN =
-    "pk.eyJ1IjoicHJhc2h1LTk5OSIsImEiOiJjbWo0MWV1NXcxZW9oM2NyN3g4czlxOHI5In0.laInwvn9hclMb6fHP0ONig";
+  const MAPBOX_TOKEN = import.meta.env.VITE_MAP_TOKEN;
   // OR better: store in .env file as REACT_APP_MAPBOX_TOKEN
 
   // Check if token is valid

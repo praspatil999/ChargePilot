@@ -1,83 +1,43 @@
 import dotenv from "dotenv";
-dotenv.config({ path: "./.env" });
+dotenv.config();
+
 import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import methodOverride from "method-override";
+
+
 const app = express();
 const port = 8080;
-import methodOverride from "method-override"; 
-app.use(methodOverride("_method"));
-import path from "path";
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-import ejsMate from "ejs-mate";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "/views"));
-app.engine("ejs", ejsMate);
-app.listen(port, () => {
-  console.log("Listing to port : 8080");
-});
-import cors from "cors";
+app.use(cookieParser());
+app.use(methodOverride("_method"));
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // Your React URL
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );
-import mongoose from "mongoose";
-import session from "express-session";
-import passport from "passport";
-import LocalStrategy from "passport-local";
-import flash from "connect-flash";
-import "./config/passport.js";
-import User from "./models/User.js";
-import userRouter from "./routes/user.js"
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-app.use(
-  session({
-    secret: "ev-app-secret",
-    resave: false,
-    saveUninitialized: false,
-  })
-);
+mongoose
+  .connect("mongodb://127.0.0.1:27017/ChargePilot")
+  .then(() => console.log("Connected to DB"))
+  .catch(console.error);
 
-app.use(passport.initialize());
-app.use(passport.session());
-
-const MONGO_URL = "mongodb://127.0.0.1:27017/ChargePilot";
-
-main()
-  .then(() => {
-    console.log("Connected to DB");
-  })
-  .catch((err) => {
-    console.log(err);
-  });
-async function main() {
-  await mongoose.connect(MONGO_URL);
-}
-
-// 1. Setup the Strategy
-passport.use(new LocalStrategy({ usernameField: 'email' }, User.authenticate()));
-passport.use(User.createStrategy());
-// 2. Setup Serialization (allows staying logged in via sessions)
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
-// 3. Initialize in Express
-app.use(passport.initialize());
-app.use(passport.session());
+import userRouter from "./routes/user.js";
+import stationRoutes from "./routes/station.js";
+import vehicleRoutes from "./routes/vehicleRoutes.js";
+import bookingRoutes from "./routes/booking.js";
 
 app.use("/", userRouter);
-
-
-import stationRoutes from "./routes/station.js";
 app.use("/api/stations", stationRoutes);
-
-
-// app.js or server.js
-import vehicleRoutes from "./routes/vehicleRoutes.js";
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/bookings", bookingRoutes);
+
+app.listen(port, () => {
+  console.log("Listening on port 8080");
+});

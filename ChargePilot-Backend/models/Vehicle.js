@@ -24,10 +24,10 @@ const VehicleSchema = new mongoose.Schema(
     },
 
     connectorType: {
-      type: String, // CCS, Type2, CHAdeMO
+      type: String,
+      enum: ["CCS", "Type2", "CHAdeMO"],
       required: true,
-    },
-
+    },  
     maxChargingPower: {
       type: Number, // kW
     },

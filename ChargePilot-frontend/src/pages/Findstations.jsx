@@ -8,7 +8,7 @@ import PageHeader from "../components/FindStations/PageHeader";
 import { mockStations } from "../init/mockStations";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ShowStations from "../components/FindStations/Showstations";
+import ShowStations from "../components/FindStations/allstations";
 
 export default function FindStations() {
   // const [location, setLocation] = useState("");
