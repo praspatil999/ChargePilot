@@ -1,11 +1,11 @@
-export default function isLoggedIn(req, res, next) {
-  if (!req.isAuthenticated()) {
-    req.session.redirectUrl = req.originalUrl;
-    req.flash("error", "Plz login to add listing.");
-    return res.redirect("/login");
+export function isAuthenticated(req, res, next){
+  if (req.isAuthenticated()) {
+    return next();
   }
-  next();
-}
+  return res.status(401).json({
+    message: "Unauthorized. Please login.",
+  });
+};
 
 export function SaveRedirectUrl(req, res, next) {
   if (req.session.redirectUrl) {
@@ -13,3 +13,4 @@ export function SaveRedirectUrl(req, res, next) {
   }
   next();
 }
+

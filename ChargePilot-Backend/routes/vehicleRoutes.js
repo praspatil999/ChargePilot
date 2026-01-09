@@ -1,7 +1,8 @@
 // routes/vehicleRoutes.js
 import express from "express";
 import Vehicle from "../models/Vehicle.js";
-import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+import { isAuthenticated } from '../middlewares.js';
+
 const router = express.Router();
 
 
