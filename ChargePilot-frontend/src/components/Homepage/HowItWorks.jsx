@@ -1,81 +1,94 @@
-// components/HowItWorks.jsx
 import React from "react";
-import { ArrowRight } from "lucide-react";
-
-const Step = ({ number, title, description, showArrow = true }) => {
-  const colorClasses = {
-    1: "from-blue-500 to-blue-600 shadow-blue-500/20",
-    2: "from-emerald-500 to-emerald-600 shadow-emerald-500/20",
-    3: "from-purple-500 to-purple-600 shadow-purple-500/20",
-    4: "from-orange-500 to-orange-600 shadow-orange-500/20",
-  };
-
-  return (
-    <div className="relative text-center group">
-      <div
-        className={`w-20 h-20 bg-gradient-to-br ${colorClasses[number]} rounded-2xl flex items-center justify-center mx-auto mb-6 text-white text-3xl font-bold shadow-xl group-hover:scale-110 transition-transform duration-300`}
-      >
-        {number}
-      </div>
-      <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
-      <p className="text-gray-600 leading-relaxed">{description}</p>
-      {showArrow && (
-        <div className="hidden lg:block absolute top-10 -right-4 text-gray-300">
-          <ArrowRight className="w-6 h-6" />
-        </div>
-      )}
-    </div>
-  );
-};
+import { Battery, MapPin, TrendingUp, Navigation } from "lucide-react";
 
 const HowItWorks = () => {
-  const steps = [
-    {
-      number: 1,
-      title: "Enter Vehicle Details",
-      description:
-        "Add your EV model, battery capacity, and current charge level.",
-    },
-    {
-      number: 2,
-      title: "Discover Stations",
-      description:
-        "Browse nearby charging stations with real-time availability data.",
-    },
-    {
-      number: 3,
-      title: "Compare & Analyze",
-      description:
-        "Compare costs, reachability, and charging speeds across stations.",
-    },
-    {
-      number: 4,
-      title: "Navigate & Charge",
-      description:
-        "Get directions and start charging at your selected station.",
-      showArrow: false,
-    },
-  ];
-
   return (
-    <section
-      id="how-it-works"
-      className="py-24 lg:py-32 bg-gradient-to-b from-gray-50 to-white"
-    >
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-5 tracking-tight">
-            How It Works
+    <section className="relative py-24 overflow-hidden bg-white">
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4 
+               bg-gradient-to-r from-emerald-600 to-blue-600 
+               bg-clip-text text-transparent">
+               How It Works
           </h2>
-          <p className="text-xl text-gray-600 font-light">
+
+          <p className="text-gray-600 text-lg">
             Four simple steps to smarter EV charging
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-          {steps.map((step) => (
-            <Step key={step.number} {...step} />
-          ))}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Step 1 */}
+          <div className="relative group rounded-2xl overflow-hidden bg-white border-2 border-gray-200 hover:border-blue-400 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="p-8 h-full">
+              <div className="flex items-start justify-between mb-6">
+                <span className="text-5xl font-bold text-blue-600">01</span>
+                <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Battery className="w-6 h-6 text-blue-600" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                Enter Vehicle Details
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Add your EV model, battery capacity, and current charge level for personalized recommendations.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="relative group rounded-2xl overflow-hidden bg-white border-2 border-gray-200 hover:border-emerald-400 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="p-8 h-full">
+              <div className="flex items-start justify-between mb-6">
+                <span className="text-5xl font-bold text-emerald-600">02</span>
+                <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                  <MapPin className="w-6 h-6 text-emerald-600" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                Discover Stations
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Browse nearby charging stations with real-time availability, pricing, and compatibility data.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="relative group rounded-2xl overflow-hidden bg-white border-2 border-gray-200 hover:border-purple-400 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="p-8 h-full">
+              <div className="flex items-start justify-between mb-6">
+                <span className="text-5xl font-bold text-purple-600">03</span>
+                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-purple-600" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                Compare & Analyze
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Compare costs, reachability, charging speeds, and battery health impact across stations.
+              </p>
+            </div>
+          </div>
+
+          {/* Step 4 */}
+          <div className="relative group rounded-2xl overflow-hidden bg-white border-2 border-gray-200 hover:border-orange-400 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="p-8 h-full">
+              <div className="flex items-start justify-between mb-6">
+                <span className="text-5xl font-bold text-orange-600">04</span>
+                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+                  <Navigation className="w-6 h-6 text-orange-600" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">
+                Navigate & Charge
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Get turn-by-turn directions and start charging at your optimally selected station.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </section>

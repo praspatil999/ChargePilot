@@ -1,4 +1,4 @@
-// components/booking/BookingStep2.js
+// components/booking/BookingStep2.jsx
 import React from "react";
 import { Zap } from "lucide-react";
 
@@ -9,10 +9,12 @@ const BookingStep2 = ({ formData, station, onChange }) => {
         <div className="bg-gradient-to-br from-blue-500 to-emerald-500 rounded-xl p-2">
           <Zap className="w-6 h-6 text-white" />
         </div>
-        <h3 className="text-xl font-bold text-gray-800">Select Charger Type</h3>
+        <h3 className="text-xl font-bold text-gray-800">
+          Select Charger Type
+        </h3>
       </div>
 
-      {station?.chargers?.map((charger, index) => (
+      {station.chargers.map((charger, index) => (
         <div
           key={index}
           className="border-2 border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-all"
@@ -26,8 +28,8 @@ const BookingStep2 = ({ formData, station, onChange }) => {
               onChange={(e) => onChange("chargerType", e.target.value)}
               className="w-5 h-5 text-blue-600"
             />
-            <div className="ml-4">
-              <div className="flex items-center justify-between">
+            <div className="ml-4 flex-1">
+              <div className="flex justify-between">
                 <span className="font-bold text-gray-800">
                   {charger.type} Charger ({charger.power}kW)
                 </span>
@@ -36,12 +38,10 @@ const BookingStep2 = ({ formData, station, onChange }) => {
                 </span>
               </div>
               <p className="text-sm text-gray-600 mt-1">
-                Estimated for {formData.duration} hour(s): ₹
-                {(
-                  charger.power *
-                  formData.duration *
-                  charger.pricePerUnit
-                ).toFixed(2)}
+                Estimated cost: ₹
+                {(charger.power *
+                  charger.pricePerUnit *
+                  Number(formData.duration)).toFixed(2)}
               </p>
             </div>
           </label>

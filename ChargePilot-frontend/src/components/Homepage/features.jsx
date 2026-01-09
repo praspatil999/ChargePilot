@@ -1,80 +1,94 @@
-// components/Features.jsx
 import React from "react";
-import { Icon } from "lucide-react";
-import { MapPin, Battery, DollarSign, Navigation } from "lucide-react";
-
-const FeatureCard = ({ icon: Icon, title, description, color }) => {
-  const colorClasses = {
-    blue: "from-blue-500 to-blue-600 shadow-blue-500/20 hover:border-blue-200",
-    emerald:
-      "from-emerald-500 to-emerald-600 shadow-emerald-500/20 hover:border-emerald-200",
-    purple:
-      "from-purple-500 to-purple-600 shadow-purple-500/20 hover:border-purple-200",
-    orange:
-      "from-orange-500 to-orange-600 shadow-orange-500/20 hover:border-orange-200",
-  };
-
-  return (
-    <div className="group bg-white border border-gray-200 p-8 rounded-2xl hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
-      <div
-        className={`w-14 h-14 bg-gradient-to-br ${colorClasses[color]} rounded-xl flex items-center justify-center mb-6 shadow-lg group-hover:scale-110 transition-transform duration-300`}
-      >
-        <Icon className="w-7 h-7 text-white" />
-      </div>
-      <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
-      <p className="text-gray-600 leading-relaxed">{description}</p>
-    </div>
-  );
-};
+import { MapPin, Battery, DollarSign, Navigation, ChevronRight } from "lucide-react";
 
 const Features = () => {
-  const features = [
-    {
-      icon: MapPin,
-      title: "Smart Station Locator",
-      description:
-        "Find charging stations near you with real-time availability and compatibility filters.",
-      color: "blue",
-    },
-    {
-      icon: Battery,
-      title: "Range Estimation",
-      description:
-        "Calculate your driving range based on battery percentage and vehicle specifications.",
-      color: "emerald",
-    },
-    {
-      icon: DollarSign,
-      title: "Cost Comparison",
-      description:
-        "Compare charging costs across different stations and find the most economical options.",
-      color: "purple",
-    },
-    {
-      icon: Navigation,
-      title: "EV Trip Planner",
-      description:
-        "Plan long trips with optimized charging stops based on your route and battery capacity.",
-      color: "orange",
-    },
-  ];
-
   return (
-    <section id="features" className="py-24 lg:py-32 bg-white">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-5 tracking-tight">
-            Powerful Features
+    <section className="relative py-24 overflow-hidden bg-gray-50">
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl lg:text-5xl font-bold mb-4 
+               bg-gradient-to-r from-emerald-600 to-blue-600 
+               bg-clip-text text-transparent">
+                Powerful Features
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto font-light">
-            Everything you need to optimize your EV charging experience
+
+          <p className="text-gray-600 text-lg">
+            Everything you need for smarter EV charging
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {features.map((feature, index) => (
-            <FeatureCard key={index} {...feature} />
-          ))}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Feature 1 - Blue */}
+          <div className="relative group rounded-2xl overflow-hidden bg-white border-2 border-gray-200 hover:border-blue-400 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="p-8 h-full flex flex-col">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-blue-500/30">
+                <MapPin className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="font-bold text-xl text-gray-900 mb-3">
+                Smart Station Locator
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed flex-grow">
+                Find nearby EV charging stations with real-time availability and route optimization.
+              </p>
+              <button className="mt-6 inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-700 transition-colors gap-1 group-hover:gap-2">
+                Learn more <ChevronRight className="w-4 h-4 transition-all" />
+              </button>
+            </div>
+          </div>
+
+          {/* Feature 2 - Emerald */}
+          <div className="relative group rounded-2xl overflow-hidden bg-white border-2 border-gray-200 hover:border-emerald-400 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="p-8 h-full flex flex-col">
+              <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-emerald-500/30">
+                <Battery className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="font-bold text-xl text-gray-900 mb-3">
+                Battery Health Insights
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed flex-grow">
+                Get personalized recommendations to extend your battery lifespan by up to 30%.
+              </p>
+              <button className="mt-6 inline-flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors gap-1 group-hover:gap-2">
+                Learn more <ChevronRight className="w-4 h-4 transition-all" />
+              </button>
+            </div>
+          </div>
+
+          {/* Feature 3 - Purple */}
+          <div className="relative group rounded-2xl overflow-hidden bg-white border-2 border-gray-200 hover:border-purple-400 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="p-8 h-full flex flex-col">
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-purple-500/30">
+                <DollarSign className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="font-bold text-xl text-gray-900 mb-3">
+                Cost Comparison
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed flex-grow">
+                Compare charging prices across stations and save money on every charge.
+              </p>
+              <button className="mt-6 inline-flex items-center text-sm font-semibold text-purple-600 hover:text-purple-700 transition-colors gap-1 group-hover:gap-2">
+                Learn more <ChevronRight className="w-4 h-4 transition-all" />
+              </button>
+            </div>
+          </div>
+
+          {/* Feature 4 - Orange */}
+          <div className="relative group rounded-2xl overflow-hidden bg-white border-2 border-gray-200 hover:border-orange-400 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+            <div className="p-8 h-full flex flex-col">
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/30">
+                <Navigation className="w-7 h-7 text-white" />
+              </div>
+              <h3 className="font-bold text-xl text-gray-900 mb-3">
+                Trip Planner
+              </h3>
+              <p className="text-gray-600 text-sm leading-relaxed flex-grow">
+                Plan long-distance routes with optimal charging stops and time estimates.
+              </p>
+              <button className="mt-6 inline-flex items-center text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors gap-1 group-hover:gap-2">
+                Learn more <ChevronRight className="w-4 h-4 transition-all" />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </section>
