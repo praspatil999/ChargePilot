@@ -5,7 +5,57 @@ import User from "../models/User.js";
 import Vehicle from "../models/Vehicle.js";
 
 
+import { protect } from "../middlewares/auth.js";
+
+
 const router = express.Router({ mergeParams: true });
+
+/* ---------------- PROFILE ---------------- */
+
+// GET /api/users/profile
+router.get("/profile", protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).populate("vehicles");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+});
+
+// PUT /api/users/profile
+router.put("/profile", protect, async (req, res) => {
+  try {
+    const { fullName, email } = req.body;
+    const user = await User.findById(req.user._id);
+
+    if (user) {
+      user.fullName = fullName || user.fullName;
+      user.email = email || user.email;
+      
+      if (req.body.password) {
+        user.password = await bcrypt.hash(req.body.password, 12);
+      }
+
+      const updatedUser = await user.save();
+      
+      // Do not return password
+      updatedUser.password = undefined;
+
+      res.json({
+        success: true,
+        user: updatedUser,
+        message: "Profile updated successfully"
+      });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+});
 
 /* ---------------- JWT UTILS ---------------- */
 
@@ -66,6 +116,7 @@ router.post("/signup", async (req, res) => {
 
     return res.status(201).json({
       message: "Signup successful",
+      token,
       user: {
         id: newUser._id,
         fullName: newUser.fullName,
@@ -105,6 +156,7 @@ router.post("/login", async (req, res) => {
 
     res.status(200).json({
       message: "Logged in successfully",
+      token,
       user: {
         id: user._id,
         fullName: user.fullName,

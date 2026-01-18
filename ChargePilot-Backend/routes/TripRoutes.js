@@ -6,9 +6,8 @@ import {
   getTripById,
   updateTripStatus,
   deleteTrip,
-  planTripWithWaypoints,
 } from "../controllers/tripController.js";
-import { isAuthenticated } from "../middleware/auth.js";
+import { protect as isAuthenticated } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -17,7 +16,6 @@ router.use(isAuthenticated);
 
 // Trip planning
 router.post("/plan", planTrip);
-router.post("/plan-with-waypoints", planTripWithWaypoints);
 
 // Trip management
 router.get("/", getUserTrips);

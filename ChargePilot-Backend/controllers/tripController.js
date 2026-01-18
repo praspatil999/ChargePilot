@@ -296,7 +296,6 @@ export const planTrip = async (req, res) => {
     };
 
     // Calculate optimal charging stops
-    console.log("Calculating charging stops...");
     const chargingAnalysis = await calculateOptimalChargingStops(
       routeData,
       vehicle,
@@ -407,7 +406,7 @@ export const planTrip = async (req, res) => {
     } else {
       res.status(500).json({
         success: false,
-        message: "Failed to plan trip",
+        message: `Failed to plan trip: ${error.message}`,
         error: error.message,
       });
     }

@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
+console.log("Loaded MAPBOX_ACCESS_TOKEN:", process.env.MAPBOX_ACCESS_TOKEN ? "Yes" : "No");
 
 import express from "express";
 import mongoose from "mongoose";
@@ -23,8 +24,10 @@ app.use(
   })
 );
 
+const dbURI = process.env.ATLASDB_URL;
+
 mongoose
-  .connect("mongodb://127.0.0.1:27017/ChargePilot")
+  .connect(dbURI)
   .then(() => console.log("Connected to DB"))
   .catch(console.error);
 
@@ -32,11 +35,13 @@ import userRouter from "./routes/user.js";
 import stationRoutes from "./routes/station.js";
 import vehicleRoutes from "./routes/vehicleRoutes.js";
 import bookingRoutes from "./routes/booking.js";
+import tripRoutes from "./routes/TripRoutes.js";
 
 app.use("/", userRouter);
 app.use("/api/stations", stationRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/trip", tripRoutes);
 
 app.listen(port, () => {
   console.log("Listening on port 8080");

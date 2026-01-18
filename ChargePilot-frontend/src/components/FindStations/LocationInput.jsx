@@ -4,7 +4,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 const OPEN_CHARGER_API_KEY = import.meta.env.VITE_OPEN_CHARGER_API_KEY;
 
-const LocationInput = ({ onStationsFetched }) => {
+const LocationInput = ({ onStationsFetched, compact = false }) => {
   const [loading, setLoading] = useState(false);
   const [detectingLocation, setDetectingLocation] = useState(false);
   const [location, setLocation] = useState("");
@@ -208,125 +208,124 @@ const LocationInput = ({ onStationsFetched }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mb-8 animate-slide-up">
-      <div className="bg-white rounded-3xl p-8 shadow-2xl shadow-blue-100/50 border border-white">
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Search className="w-10 h-10 text-white" />
+    <div className={compact ? "w-full" : "max-w-2xl mx-auto mb-8 animate-slide-up"}>
+      <div className={compact ? "" : "bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-2xl shadow-blue-100/50 dark:shadow-blue-900/10 border border-white dark:border-gray-700 transition-colors duration-300"}>
+        {!compact && (
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <Search className="w-10 h-10 text-white" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2 transition-colors">
+              Find EV Charging Stations
+            </h2>
+            <p className="text-gray-600 dark:text-gray-400 transition-colors">
+              Discover charging points near you using browser location
+            </p>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Find EV Charging Stations
-          </h2>
-          <p className="text-gray-600">
-            Discover charging points near you using browser location
-          </p>
-        </div>
+        )}
 
-        <div className="space-y-6">
+        <div className={compact ? "flex flex-col md:flex-row gap-3" : "space-y-6"}>
           {/* Location Input */}
-          <div className="relative group">
+          <div className={`relative group ${compact ? "flex-1" : ""}`}>
             <div className="absolute left-4 top-1/2 transform -translate-y-1/2 z-10">
-              <MapPin className="w-6 h-6 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+              <MapPin className={`text-gray-400 group-focus-within:text-blue-500 transition-colors ${compact ? "w-5 h-5" : "w-6 h-6"}`} />
             </div>
             <input
               type="text"
-              placeholder="Enter city name or click 'Use Current Location'"
+              placeholder={compact ? "Enter city or location..." : "Enter city name or click 'Use Current Location'"}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               onKeyPress={handleKeyPress}
-              className="w-full pl-14 pr-4 py-5 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all text-lg bg-gray-50/50 group-hover:bg-white group-hover:border-blue-300"
+              className={`w-full pl-12 pr-4 border-2 border-gray-200 dark:border-gray-600 focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-gray-50/50 dark:bg-gray-700/50 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 group-hover:bg-white dark:group-hover:bg-gray-700 group-hover:border-blue-300 dark:group-hover:border-blue-500 ${compact ? "py-2.5 rounded-xl text-sm" : "py-5 rounded-2xl text-lg"}`}
               disabled={loading}
             />
           </div>
 
-          {/* Status Message */}
-          {status && (
-            <div
-              className={`text-center p-3 rounded-xl text-sm font-medium ${
-                status.includes("Error:") ||
-                status.includes("denied") ||
-                status.includes("unavailable")
-                  ? "bg-red-50 text-red-600"
-                  : status.includes("Found")
-                  ? "bg-green-50 text-green-600"
-                  : "bg-blue-50 text-blue-600"
-              }`}
+          <div className={`flex gap-3 ${compact ? "w-full md:w-auto" : "flex-col"}`}>
+            {/* Find Stations Button */}
+            <button
+              onClick={() => handleFetchStations(false)}
+              disabled={loading || !location.trim()}
+              className={`bg-gradient-to-r from-blue-600 to-emerald-600 text-white hover:shadow-xl hover:shadow-blue-500/30 transition-all duration-300 font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 active:translate-y-0 flex items-center justify-center space-x-2 group ${compact ? "px-5 py-2.5 rounded-xl text-sm whitespace-nowrap" : "w-full px-6 py-5 rounded-2xl text-lg"}`}
             >
-              {status}
-            </div>
-          )}
+              <span>{loading && !detectingLocation ? "..." : "Search"}</span>
+              {!loading && !compact && (
+                 <div className="group-hover:translate-x-1 transition-transform">
+                  <Search className="w-5 h-5" />
+                </div>
+              )}
+            </button>
 
-          {/* Find Stations Button (for manual search) */}
-          <button
-            onClick={() => handleFetchStations(false)}
-            disabled={loading || !location.trim()}
-            className="w-full bg-gradient-to-r from-blue-600 to-emerald-600 text-white px-6 py-5 rounded-2xl hover:shadow-2xl hover:shadow-blue-500/30 transition-all duration-300 font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 active:translate-y-0 flex items-center justify-center space-x-2 group"
-          >
-            <span>
-              {loading && !detectingLocation
-                ? "Searching..."
-                : "Search Stations"}
-            </span>
-            {!loading && (
-              <div className="group-hover:translate-x-1 transition-transform">
-                <Search className="w-5 h-5" />
-              </div>
-            )}
-          </button>
-
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500 font-medium">
-                OR
-              </span>
-            </div>
+             {/* Use Current Location Button */}
+            <button
+              onClick={() => handleFetchStations(true)}
+              disabled={loading}
+              className={`bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:shadow-xl hover:shadow-purple-500/30 transition-all duration-300 font-bold disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 active:translate-y-0 flex items-center justify-center space-x-2 group ${compact ? "px-4 py-2.5 rounded-xl text-sm" : "w-full px-6 py-5 rounded-2xl text-lg"}`}
+              title="Use Current Location"
+            >
+              <Crosshair className={`w-5 h-5 ${detectingLocation ? "animate-spin" : ""}`} />
+              {!compact && <span>{detectingLocation ? "Accessing..." : "Use Browser Location"}</span>}
+            </button>
           </div>
 
-          {/* Use Current Location Button - This uses browser's Geolocation API */}
-          <button
-            onClick={() => handleFetchStations(true)}
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-5 rounded-2xl hover:shadow-2xl hover:shadow-purple-500/30 transition-all duration-300 font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-1 active:translate-y-0 flex items-center justify-center space-x-3 group"
-          >
-            <Crosshair
-              className={`w-5 h-5 ${detectingLocation ? "animate-spin" : ""}`}
-            />
-            <span>
-              {detectingLocation
-                ? "Accessing Location..."
-                : "Use Browser Location"}
-            </span>
-          </button>
-
-          <div className="text-xs text-gray-500 text-center mt-2">
-            <p>
-              Clicking "Use Browser Location" will request permission to access
-              your device's location
-            </p>
-          </div>
-
-          {/* Popular Cities */}
-          <div className="pt-6 border-t border-gray-200">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">
-              Popular Indian Cities
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {popularCities.map((city) => (
-                <button
-                  key={city}
-                  onClick={() => handlePopularCityClick(city)}
-                  disabled={loading}
-                  className="px-4 py-2 bg-gradient-to-r from-blue-50 to-emerald-50 text-blue-700 rounded-xl hover:bg-blue-100 hover:scale-105 transition-all duration-200 text-sm font-medium disabled:opacity-50 border border-blue-100"
+          {!compact && (
+            <>
+               {/* Status Message */}
+              {status && (
+                <div
+                  className={`text-center p-3 rounded-xl text-sm font-medium ${
+                    status.includes("Error:") ||
+                    status.includes("denied") ||
+                    status.includes("unavailable")
+                      ? "bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400"
+                      : status.includes("Found")
+                      ? "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400"
+                      : "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
+                  }`}
                 >
-                  {city}
-                </button>
-              ))}
-            </div>
-          </div>
+                  {status}
+                </div>
+              )}
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400 font-medium transition-colors">
+                    OR
+                  </span>
+                </div>
+              </div>
+
+               <div className="text-xs text-gray-500 dark:text-gray-400 text-center mt-2 transition-colors">
+                <p>
+                  Clicking "Use Browser Location" will request permission to access
+                  your device's location
+                </p>
+              </div>
+
+              {/* Popular Cities */}
+              <div className="pt-6 border-t border-gray-200 dark:border-gray-700 transition-colors">
+                <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 transition-colors">
+                  Popular Indian Cities
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {popularCities.map((city) => (
+                    <button
+                      key={city}
+                      onClick={() => handlePopularCityClick(city)}
+                      disabled={loading}
+                      className="px-4 py-2 bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-900/30 dark:to-emerald-900/30 text-blue-700 dark:text-blue-300 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-900/50 hover:scale-105 transition-all duration-200 text-sm font-medium disabled:opacity-50 border border-blue-100 dark:border-blue-900/50"
+                    >
+                      {city}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

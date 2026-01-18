@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useContext } from "react";
 import Navbar from "../components/Navbar";
 import Hero from "../components/Homepage/Hero";
 import Features from "../components/Homepage/features";
@@ -6,26 +6,26 @@ import HowItWorks from "../components/Homepage/HowItWorks";
 import MapPreview from "../components/Homepage/MapView";
 import CTA from "../components/Homepage/CTA";
 import Footer from "../components/Footer";
-import ClickSpark from "@/components/3D Elements/ClickSpark";
+import DarkModeContext from "../context/DarkModeContext";
 
 export default function Home() {
+  const { darkMode } = useContext(DarkModeContext);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
-    <ClickSpark
-  sparkColor="#fff"
-  sparkSize={10}
-  sparkRadius={15}
-  sparkCount={8}
-  duration={400}
-  >
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen ${darkMode ? "dark bg-gray-900" : "bg-white"} font-[Outfit] transition-colors duration-300`}>
       <Navbar />
-      <Hero />
-      <Features />
-      <HowItWorks />
-      <MapPreview />
-      <CTA />
-      <Footer />
+      <main className="flex flex-col">
+        <Hero darkMode={darkMode} />
+        <Features darkMode={darkMode} />
+        <HowItWorks darkMode={darkMode} />
+        <MapPreview darkMode={darkMode} />
+        <CTA darkMode={darkMode} />
+      </main>
+      <Footer darkMode={darkMode} />
     </div>
-  </ClickSpark>
   );
 }

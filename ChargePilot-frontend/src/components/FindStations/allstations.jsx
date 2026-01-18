@@ -11,14 +11,16 @@ import {
   Star,
   ChevronRight,
   Phone,
-  Globe,
-  ParkingSquare,
-  Calendar
+  LayoutGrid,
+  List,
+  Search,
+  X
 } from "lucide-react";
 import LocationInput from "./LocationInput";
 import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
 
-function ShowStations() {
+function StationFinder() {
   const navigate = useNavigate();
   const [stationsData, setStationsData] = useState(null);
   const [selectedStation, setSelectedStation] = useState(null);
@@ -33,500 +35,290 @@ function ShowStations() {
 
   // Mock station status for demo
   const getStationStatus = (station) => {
-    const statuses = ["Available", "In Use", "Coming Soon"];
+    const statuses = ["Available", "Busy", "Offline"];
     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
     return {
       text: randomStatus,
       color:
         randomStatus === "Available"
-          ? "bg-green-500"
-          : randomStatus === "In Use"
-          ? "bg-yellow-500"
-          : "bg-gray-500",
-      badge:
+          ? "bg-emerald-500"
+          : randomStatus === "Busy"
+          ? "bg-amber-500"
+          : "bg-gray-400",
+      bgValues:
         randomStatus === "Available"
-          ? "text-green-700 bg-green-100"
-          : randomStatus === "In Use"
-          ? "text-yellow-700 bg-yellow-100"
-          : "text-gray-700 bg-gray-100",
+          ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800"
+          : randomStatus === "Busy"
+          ? "bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-800"
+          : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700",
     };
   };
 
-  // Mock charging speed
-  const getChargingSpeed = () => {
-    const speeds = [
-      "Fast (50kW)",
-      "Super (150kW)",
-      "Ultra (350kW)",
-      "Standard (22kW)",
-    ];
-    return speeds[Math.floor(Math.random() * speeds.length)];
-  };
-
-  // Mock pricing
-  const getPricing = () => {
-    return `₹${(Math.random() * 15 + 8).toFixed(2)}/kWh`;
-  };
-
-  // Mock amenities
-  const getAmenities = () => {
-    const amenities = [
-      { icon: <Wifi className="w-4 h-4" />, label: "WiFi" },
-      { icon: <Coffee className="w-4 h-4" />, label: "Cafe" },
-      { icon: <ParkingSquare className="w-4 h-4" />, label: "Parking" },
-    ];
-    return amenities.slice(0, Math.floor(Math.random() * 3) + 1);
-  };
-
-  // Mock connector types
-  const getConnectorTypes = () => {
-    const connectors = ["CCS2", "CHAdeMO", "Type 2", "GB/T"];
-    return connectors.slice(0, Math.floor(Math.random() * 2) + 1);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-emerald-600 text-white">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold">EV Charging Finder</h1>
-              <p className="text-blue-100 mt-2">
-                Find the best charging stations near you
-              </p>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 flex items-center space-x-2">
-                <Zap className="w-5 h-5" />
-                <span className="font-semibold">EV</span>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col font-[Outfit] transition-colors duration-300">
+      {/* Header & Search */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-30 transition-colors duration-300">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <Zap className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-white tracking-tight transition-colors">Station Finder</h1>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium transition-colors">Global Network</p>
               </div>
             </div>
-          </div>
+            
+            <div className="flex-1 max-w-2xl">
+               <LocationInput onStationsFetched={handleStationsFetched} compact={true} />
+            </div>
 
-          {/* Search Section */}
-          <div className="max-w-4xl mx-auto">
-            <LocationInput onStationsFetched={handleStationsFetched} />
+             <div className="flex items-center space-x-3">
+                {/* View Toggle */}
+               <div className="hidden md:flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg transition-colors">
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`p-2 rounded-md transition-all ${viewMode === "list" ? "bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"}`}
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`p-2 rounded-md transition-all ${viewMode === "grid" ? "bg-white dark:bg-gray-600 shadow-sm text-gray-900 dark:text-white" : "text-gray-400 dark:text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"}`}
+                  >
+                    <LayoutGrid className="w-5 h-5" />
+                  </button>
+               </div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        {stationsData ? (
-          <div className="animate-fade-in">
-            {/* Results Header */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    <span className="text-emerald-600">
-                      {stationsData.total}
-                    </span>{" "}
-                    Stations Found
-                  </h2>
-                  <p className="text-gray-600 mt-1">
-                    Near{" "}
-                    <span className="font-semibold">
-                      {stationsData.locationName}
-                    </span>
-                  </p>
-                </div>
-
-                <div className="flex items-center space-x-4">
-                  {/* View Toggle */}
-                  <div className="bg-gray-100 rounded-xl p-1 flex">
-                    <button
-                      onClick={() => setViewMode("list")}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                        viewMode === "list"
-                          ? "bg-white shadow-md text-blue-600"
-                          : "text-gray-600 hover:text-gray-800"
-                      }`}
-                    >
-                      List View
-                    </button>
-                    <button
-                      onClick={() => setViewMode("grid")}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                        viewMode === "grid"
-                          ? "bg-white shadow-md text-blue-600"
-                          : "text-gray-600 hover:text-gray-800"
-                      }`}
-                    >
-                      Grid View
-                    </button>
-                  </div>
-
-                  {/* Filter Dropdown */}
-                  <div className="relative">
-                    <select
+      <div className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
+        <AnimatePresence mode="wait">
+          {stationsData ? (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              {/* Results Meta */}
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white transition-colors">
+                  {stationsData.total} stations near <span className="text-blue-600 dark:text-blue-400 transition-colors">{stationsData.locationName}</span>
+                </h2>
+                
+                {/* Mobile Filter / Sort */}
+                <div className="flex items-center gap-2">
+                   <select 
+                      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-sm font-medium rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 text-gray-900 dark:text-white transition-colors"
                       value={filter}
                       onChange={(e) => setFilter(e.target.value)}
-                      className="appearance-none bg-white border border-gray-300 rounded-xl pl-4 pr-10 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none font-medium"
-                    >
-                      <option value="all">All Stations</option>
-                      <option value="fast">Fast Charging</option>
-                      <option value="available">Available Now</option>
-                    </select>
-                    <Filter className="w-5 h-5 absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
-                  </div>
+                   >
+                     <option value="all">All types</option>
+                     <option value="fast">Fast (50kW+)</option>
+                     <option value="available">Available</option>
+                   </select>
                 </div>
               </div>
-            </div>
 
-            {/* Stations Grid/List */}
-            <div
-              className={
-                viewMode === "grid"
-                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                  : "space-y-6"
-              }
-            >
-              {stationsData.stations.map((station, index) => {
-                const status = getStationStatus(station);
-                const chargingSpeed = getChargingSpeed();
-                const pricing = getPricing();
-                const amenities = getAmenities();
-                const connectorTypes = getConnectorTypes();
+              {/* Grid/List */}
+              <div className={viewMode === "grid" ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" : "space-y-4"}>
+                {stationsData.stations.map((station) => {
+                   const status = getStationStatus(station);
+                   // Mock data for display
+                   const speed = [22, 50, 150, 350][Math.floor(Math.random()*4)];
+                   const price = (Math.random()*15 + 10).toFixed(2);
+                   const rating = (Math.random() * 2 + 3).toFixed(1);
 
-                return (
-                  <div
-                    key={station.id}
-                    className={`bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 ${
-                      selectedStation?.id === station.id
-                        ? "ring-2 ring-blue-500"
-                        : ""
-                    }`}
-                    onClick={() => setSelectedStation(station)}
-                  >
-                    {/* Station Card */}
-                    <div className="p-6">
-                      {/* Header */}
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-start space-x-3">
-                          <div className="bg-gradient-to-br from-blue-500 to-emerald-500 rounded-xl p-2">
-                            <Zap className="w-6 h-6 text-white" />
-                          </div>
-                          <div>
-                            <h3 className="font-bold text-lg text-gray-800">
-                              {station.name}
-                            </h3>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                              <span className="text-sm font-medium text-gray-700">
-                                4.{(Math.random() * 9 + 1).toFixed(1)}
-                              </span>
-                              <span className="text-sm text-gray-500">•</span>
-                              <span
-                                className={`text-xs font-semibold px-2 py-1 rounded-full ${status.badge}`}
-                              >
-                                {status.text}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <span
-                            className={`w-3 h-3 rounded-full ${status.color}`}
-                          ></span>
-                          <span className="text-xs font-medium text-gray-600">
-                            {station.distance.toFixed(1)} km
-                          </span>
-                        </div>
-                      </div>
+                   return (
+                     <motion.div
+                        layout
+                        key={station.id}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                        onClick={() => setSelectedStation({...station, status, speed, price, rating})}
+                        className={`bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden cursor-pointer group shadow-sm hover:shadow-xl hover:shadow-blue-900/5 transition-all duration-300 ${selectedStation?.id === station.id ? 'ring-2 ring-blue-500' : ''}`}
+                     >
+                        <div className="p-5">
+                           <div className="flex justify-between items-start mb-4">
+                              <div className="flex items-start gap-4">
+                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${status.bgValues}`}>
+                                    <Zap className="w-6 h-6" />
+                                 </div>
+                                 <div>
+                                    <h3 className="font-bold text-gray-900 leading-tight mb-1 group-hover:text-blue-600 transition-colors">{station.name}</h3>
+                                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                                       <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400"/> {rating}</span>
+                                       <span>•</span>
+                                       <span>{station.distance.toFixed(1)} km</span>
+                                    </div>
+                                 </div>
+                              </div>
+                              <div className={`px-2.5 py-1 rounded-full text-xs font-bold border ${status.bgValues}`}>
+                                 {status.text}
+                              </div>
+                           </div>
 
-                      {/* Address */}
-                      <div className="flex items-start space-x-2 mb-4">
-                        <MapPin className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
-                        <div>
-                          <p className="text-gray-700">{station.address}</p>
-                          <p className="text-sm text-gray-500">
-                            {station.city}
-                          </p>
-                        </div>
-                      </div>
+                           <div className="grid grid-cols-2 gap-3 mb-4">
+                              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5 transition-colors">
+                                 <div className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase mb-0.5">Speed</div>
+                                 <div className="text-sm font-bold text-gray-900 dark:text-white">{speed} kW</div>
+                              </div>
+                              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-2.5 transition-colors">
+                                 <div className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase mb-0.5">Rate</div>
+                                 <div className="text-sm font-bold text-gray-900 dark:text-white">₹{price}/kWh</div>
+                              </div>
+                           </div>
 
-                      {/* Details Grid */}
-                      <div className="grid grid-cols-2 gap-4 mb-4">
-                        <div className="bg-gray-50 rounded-xl p-3">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <Battery className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm font-medium text-gray-700">
-                              Speed
-                            </span>
-                          </div>
-                          <p className="font-bold text-gray-800">
-                            {chargingSpeed}
-                          </p>
-                        </div>
-
-                        <div className="bg-gray-50 rounded-xl p-3">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <Navigation className="w-4 h-4 text-emerald-600" />
-                            <span className="text-sm font-medium text-gray-700">
-                              Price
-                            </span>
-                          </div>
-                          <p className="font-bold text-gray-800">{pricing}</p>
-                        </div>
-                      </div>
-
-                      {/* Connectors & Amenities */}
-                      <div className="space-y-3">
-                        <div>
-                          <p className="text-sm font-medium text-gray-700 mb-2">
-                            Connector Types
-                          </p>
-                          <div className="flex flex-wrap gap-2">
-                            {connectorTypes.map((type, idx) => (
-                              <span
-                                key={idx}
-                                className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium"
-                              >
-                                {type}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {amenities.length > 0 && (
-                          <div>
-                            <p className="text-sm font-medium text-gray-700 mb-2">
-                              Amenities
-                            </p>
-                            <div className="flex space-x-2">
-                              {amenities.map((amenity, idx) => (
-                                <div
-                                  key={idx}
-                                  className="flex items-center space-x-1 px-3 py-1.5 bg-gray-100 rounded-lg"
-                                >
-                                  {amenity.icon}
-                                  <span className="text-sm text-gray-600">
-                                    {amenity.label}
-                                  </span>
-                                </div>
+                           <div className="flex items-center gap-1.5 mb-5 flex-wrap">
+                              {["CCS2", "Type 2"].map((type, i) => (
+                                 <span key={i} className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-medium rounded-md transition-colors">
+                                    {type}
+                                 </span>
                               ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                           </div>
 
-                      {/* Action Buttons */}
-                      <div className="flex space-x-3 mt-6">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedStation(station);
-                          }}
-                          className="flex-1 bg-gradient-to-r from-blue-600 to-emerald-600 text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 hover:shadow-lg transition-all duration-300"
-                        >
-                          <span>View Details</span>
-                          <ChevronRight className="w-5 h-5" />
-                        </button>
-
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/book/${station.id}`);
-                          }}
-                          className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 font-bold flex items-center justify-center space-x-2"
-                        >
-                          <span>Book Now</span>
-                          <Calendar className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Selected Station Modal */}
-            {selectedStation && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 animate-fade-in">
-                <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                  <div className="p-6">
-                    {/* Modal Header */}
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="flex items-start space-x-4">
-                        <div className="bg-gradient-to-br from-blue-500 to-emerald-500 rounded-xl p-3">
-                          <Zap className="w-8 h-8 text-white" />
+                           <div className="flex gap-3">
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); navigate(`/book/${station.id}`)}}
+                                className="flex-1 bg-gray-900 dark:bg-blue-600 text-white py-2.5 rounded-xl text-sm font-semibold hover:bg-gray-800 dark:hover:bg-blue-700 transition-colors"
+                              >
+                                Book Slot
+                              </button>
+                           </div>
                         </div>
-                        <div>
-                          <h3 className="text-2xl font-bold text-gray-800">
-                            {selectedStation.name}
-                          </h3>
-                          <p className="text-gray-600">
-                            {selectedStation.operator}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setSelectedStation(null)}
-                        className="text-gray-400 hover:text-gray-600"
-                      >
-                        ✕
-                      </button>
-                    </div>
-
-                    {/* Modal Content */}
-                    <div className="space-y-6">
-                      {/* Location Section */}
-                      <div className="bg-gray-50 rounded-xl p-5">
-                        <div className="flex items-center space-x-3 mb-3">
-                          <MapPin className="w-6 h-6 text-blue-600" />
-                          <h4 className="font-bold text-lg text-gray-800">
-                            Location
-                          </h4>
-                        </div>
-                        <p className="text-gray-700 mb-2">
-                          {selectedStation.address}
-                        </p>
-                        <p className="text-gray-600">{selectedStation.city}</p>
-                        <div className="mt-3 flex items-center space-x-4">
-                          <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 font-medium">
-                            <Navigation className="w-5 h-5" />
-                            <span>Get Directions</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Charging Info */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-blue-50 rounded-xl p-4">
-                          <h4 className="font-bold text-gray-800 mb-2">
-                            Charging Speed
-                          </h4>
-                          <p className="text-2xl font-bold text-blue-700">
-                            {getChargingSpeed()}
-                          </p>
-                        </div>
-                        <div className="bg-emerald-50 rounded-xl p-4">
-                          <h4 className="font-bold text-gray-800 mb-2">
-                            Price
-                          </h4>
-                          <p className="text-2xl font-bold text-emerald-700">
-                            {getPricing()}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Contact & Hours */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-gray-50 rounded-xl p-4">
-                          <div className="flex items-center space-x-2 mb-3">
-                            <Phone className="w-5 h-5 text-gray-600" />
-                            <h4 className="font-bold text-gray-800">Contact</h4>
-                          </div>
-                          <p className="text-gray-700">
-                            +91{" "}
-                            {Math.floor(Math.random() * 9000000000) +
-                              1000000000}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 rounded-xl p-4">
-                          <div className="flex items-center space-x-2 mb-3">
-                            <Clock className="w-5 h-5 text-gray-600" />
-                            <h4 className="font-bold text-gray-800">Hours</h4>
-                          </div>
-                          <p className="text-gray-700">24/7 Available</p>
-                        </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex space-x-4 pt-4">
-                        <button
-                          onClick={() => {
-                            navigate(`/book/${selectedStation.id}`);
-                            setSelectedStation(null);
-                          }}
-                          className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 font-bold"
-                        >
-                          Book Now
-                        </button>
-                        <button className="flex-1 border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-semibold hover:bg-blue-50 transition-colors">
-                          Save Station
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                     </motion.div>
+                   )
+                })}
               </div>
-            )}
 
-            {/* Footer Stats */}
-            <div className="mt-12 bg-gradient-to-r from-blue-600 to-emerald-600 rounded-2xl text-white p-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold">24/7</div>
-                  <div className="text-blue-100 mt-1">Service Hours</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold">₹12.5</div>
-                  <div className="text-blue-100 mt-1">Avg. Price/kWh</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold">15min</div>
-                  <div className="text-blue-100 mt-1">Fastest Charge</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold">4.8★</div>
-                  <div className="text-blue-100 mt-1">Avg. Rating</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Empty State */
-          <div className="max-w-2xl mx-auto text-center py-16">
-            <div className="w-32 h-32 bg-gradient-to-br from-blue-100 to-emerald-100 rounded-3xl flex items-center justify-center mx-auto mb-8">
-              <Zap className="w-16 h-16 text-gray-400" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-700 mb-3">
-              Find Charging Stations
-            </h3>
-            <p className="text-gray-500 mb-8">
-              Enter your location or use current location to discover EV
-              charging stations near you
-            </p>
-            <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
-              {["Fast Charging", "24/7 Service", "Multiple Connectors"].map(
-                (feature, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-white p-4 rounded-xl shadow-sm border"
-                  >
-                    <div className="text-blue-600 font-bold text-lg mb-1">
-                      {idx === 0 ? "⚡" : idx === 1 ? "🕒" : "🔌"}
-                    </div>
-                    <div className="text-sm text-gray-600">{feature}</div>
-                  </div>
-                )
-              )}
-            </div>
-          </div>
-        )}
+            </motion.div>
+          ) : (
+            /* Empty State */
+            <motion.div 
+               initial={{ opacity: 0 }}
+               animate={{ opacity: 1 }}
+               className="flex flex-col items-center justify-center py-20 text-center"
+            >
+               <div className="w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-6 transition-colors">
+                  <Search className="w-10 h-10 text-blue-500 dark:text-blue-400" />
+               </div>
+               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors">Search for stations</h2>
+               <p className="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-8 transition-colors">
+                  Enter a city, zip code, or address to find nearby charging stations tailored to your EV.
+               </p>
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-3xl opacity-60">
+                  {/* Decorative placeholders */}
+                  {[1,2,3,4].map(i => (
+                     <div key={i} className="h-32 bg-gray-100 dark:bg-gray-800 rounded-2xl animate-pulse transition-colors"></div>
+                  ))}
+               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Custom Animation */}
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.5s ease-out;
-        }
-      `}</style>
+       {/* Detailed Side Panel / Modal */}
+       <AnimatePresence>
+          {selectedStation && (
+             <>
+               <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setSelectedStation(null)}
+                  className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+               />
+               <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                  className="fixed inset-y-0 right-0 w-full max-w-md bg-white shadow-2xl z-50 overflow-y-auto"
+               >
+                  <div className="p-6">
+                     <button 
+                        onClick={() => setSelectedStation(null)}
+                        className="absolute top-4 right-4 p-2 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+                     >
+                        <X className="w-5 h-5 text-gray-500" />
+                     </button>
+                     
+                     <div className="mt-8">
+                        <div className={`inline-flex px-3 py-1 rounded-full text-xs font-bold border mb-4 ${selectedStation.status.bgValues}`}>
+                           {selectedStation.status.text}
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-900 leading-tight mb-2">{selectedStation.name}</h2>
+                        <div className="flex items-center text-gray-500 mb-6">
+                           <MapPin className="w-4 h-4 mr-1.5" />
+                           <span className="text-sm">{selectedStation.address}, {selectedStation.city}</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-8">
+                           <div className="bg-blue-50 p-4 rounded-2xl">
+                              <div className="flex items-center gap-2 mb-2 text-blue-700">
+                                 <Zap className="w-5 h-5" />
+                                 <span className="font-bold">Power</span>
+                              </div>
+                              <span className="text-2xl font-bold text-gray-900">{selectedStation.speed} kW</span>
+                           </div>
+                           <div className="bg-emerald-50 p-4 rounded-2xl">
+                              <div className="flex items-center gap-2 mb-2 text-emerald-700">
+                                 <CreditCardIcon className="w-5 h-5" />
+                                 <span className="font-bold">Price</span>
+                              </div>
+                              <span className="text-2xl font-bold text-gray-900">₹{selectedStation.price}</span>
+                           </div>
+                        </div>
+
+                        <h3 className="font-bold text-gray-900 mb-4">Amenities</h3>
+                        <div className="flex gap-3 mb-8">
+                           {[<Wifi className="w-4 h-4"/>, <Coffee className="w-4 h-4"/>].map((icon, i) => (
+                              <div key={i} className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-600">
+                                 {icon}
+                              </div>
+                           ))}
+                        </div>
+
+                        <button 
+                           onClick={() => navigate(`/book/${selectedStation.id}`)}
+                           className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all hover:shadow-xl hover:shadow-blue-500/30 active:scale-[0.98]"
+                        >
+                           Book Charging Slot
+                        </button>
+                     </div>
+                  </div>
+               </motion.div>
+             </>
+          )}
+       </AnimatePresence>
     </div>
   );
 }
 
-export default ShowStations;
+function CreditCardIcon(props) {
+   return (
+      <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect width="20" height="14" x="2" y="5" rx="2" />
+      <line x1="2" x2="22" y1="10" y2="10" />
+    </svg>
+   )
+}
+
+export default StationFinder;

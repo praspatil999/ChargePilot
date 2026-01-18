@@ -95,35 +95,19 @@ const tripSchema = new mongoose.Schema({
     default: 0,
   },
 
-  status: {
+    status: {
     type: String,
     enum: ["planned", "in_progress", "completed", "cancelled"],
     default: "planned",
   },
-
+  
   startedAt: Date,
   completedAt: Date,
 
   notes: String,
-
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, { timestamps: true });
 
 // Index for user trips
 tripSchema.index({ user: 1, createdAt: -1 });
-
-// Update timestamp before saving
-tripSchema.pre("save", function (next) {
-  this.updatedAt = Date.now();
-  next();
-});
 
 export default mongoose.model("Trip", tripSchema);

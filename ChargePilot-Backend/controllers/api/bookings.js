@@ -43,6 +43,25 @@ export const createBooking = async (req, res) => {
       scheduledStart.getTime() + Number(duration) * 60 * 60 * 1000
     );
 
+    // Check for overlapping bookings
+    const existingBooking = await Booking.findOne({
+      stationOCMId,
+      status: { $ne: "cancelled" },
+      $or: [
+        {
+          scheduledStart: { $lt: scheduledEnd },
+          scheduledEnd: { $gt: scheduledStart },
+        },
+      ],
+    });
+
+    if (existingBooking) {
+      return res.status(409).json({
+        success: false,
+        message: "Slot already booked. Please choose a different time.",
+      });
+    }
+
     const hours = Number(duration);
     const chargerPower = stationSnapshot.power;
     const vehicleLimit = vehicle.maxChargingPower || chargerPower;
@@ -72,7 +91,33 @@ export const createBooking = async (req, res) => {
     console.error("BOOKING API CRASH:", error);
     return res.status(500).json({
       success: false,
-      message: error.message, // TEMP: expose real error
+      message: error.message,
+    });
+  }
+};
+
+export const getMyBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.findOne({ user: req.user._id })
+      .sort({ scheduledStart: -1 }) // Newest first
+      .populate("vehicle");
+
+    // If findOne returns null (no bookings), we should return an empty array if we want a list, 
+    // BUT findOne only returns ONE document. We need find().
+    const allBookings = await Booking.find({ user: req.user._id })
+      .sort({ scheduledStart: -1 })
+      .populate("vehicle");
+
+    res.status(200).json({
+      success: true,
+      count: allBookings.length,
+      bookings: allBookings,
+    });
+  } catch (error) {
+    console.error("GET MY BOOKINGS ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server Error",
     });
   }
 };
