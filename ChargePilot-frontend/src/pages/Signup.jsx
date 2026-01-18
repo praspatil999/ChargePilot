@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
+import api from "../api/axios";
 
 export default function Signup() {
   const navigate = useNavigate();
@@ -71,15 +72,11 @@ export default function Signup() {
     };
 
     try {
-      const response = await fetch("http://localhost:8080/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
+      const response = await api.post("/signup", userData);
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         localStorage.setItem("isLoggedIn", "true");
         if (data.token) {
             localStorage.setItem("authToken", data.token);
@@ -91,7 +88,8 @@ export default function Signup() {
       }
     } catch (error) {
       console.error("Connection Error:", error);
-      alert("Could not connect to the server. Is the backend running?");
+      const errorMessage = error.response?.data?.message || "Could not connect to the server. Is the backend running?";
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }

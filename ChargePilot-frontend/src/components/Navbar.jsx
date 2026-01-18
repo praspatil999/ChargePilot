@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import DarkModeContext from "../context/DarkModeContext";
+import api from "../api/axios";
 
 const Navbar = () => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -47,17 +48,12 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       // Call logout endpoint
-      const response = await fetch("http://localhost:8080/logout", {
-        method: "GET",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await api.get("/logout");
 
-      if (response.ok) {
+      if (response.status === 200) {
         // Clear local storage
         localStorage.removeItem("isLoggedIn");
+        localStorage.removeItem("authToken");
         localStorage.removeItem("userName");
 
         // Update state

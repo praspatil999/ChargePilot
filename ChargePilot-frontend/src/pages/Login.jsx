@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Zap, Mail, Lock, Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
+import api from "../api/axios";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,16 +16,11 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8080/login", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await api.post("/login", { email, password });
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok) {
+      if (response.status === 200) {
         localStorage.setItem("isLoggedIn", "true");
         if (data.token) {
             localStorage.setItem("authToken", data.token); // Store token
@@ -37,7 +33,8 @@ export default function Login() {
       }
     } catch (error) {
       console.error("Login Error:", error);
-      alert("Could not connect to the server.");
+      const errorMessage = error.response?.data?.message || "Could not connect to the server.";
+      alert(errorMessage);
     } finally {
       setIsLoading(false);
     }
